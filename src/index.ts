@@ -1,15 +1,34 @@
-import { config } from "dotenv";
+import "./side-effect";
+
+import { ResultAsync, fromSafePromise } from "neverthrow";
 
 import { logger } from "@adapters/logger";
 
-config();
+import { client } from "./client";
 
-export const main = async () => {
-  logger.debug("Hello, world!");
-  logger.info("Hello, world!");
-  logger.success("Hello, world!");
-  logger.warning("Hello, world!");
-  logger.error("Hello, world!");
+const execute = () => {
+  return fromSafePromise(
+    (async () => {
+      await client.query("BEGIN");
+      await client.query("SELECT * FROM users");
+      await client.query("COMMIT");
+    })()
+  );
 };
 
-void main();
+const main = (): ResultAsync<void, unknown> => {
+  const a = execute();
+
+  const b = fromSafePromise(
+    (async () => {
+      await client.transaction(execute);
+    })()
+  );
+
+  return ResultAsync.combine([a, b]).map(() => void 0);
+};
+
+void main().match(
+  () => logger.success("main function completed successfully"),
+  (err) => logger.error("main function failed", err)
+);

@@ -4,7 +4,9 @@ const config = {
     project: "./tsconfig.eslint.json",
   },
   extends: ["@naporin0624/eslint-config"],
+  plugins: ["unicorn"],
   rules: {
+    "unicorn/prefer-node-protocol": "error",
     "import/no-extraneous-dependencies": [
       "error",
       {
@@ -31,6 +33,18 @@ const config = {
       rules: {
         "@typescript-eslint/no-empty-interface": "off",
         "@typescript-eslint/consistent-type-imports": "off",
+      },
+    },
+    {
+      files: ["**/repository/**/*.ts"],
+      rules: {
+        "@typescript-eslint/no-empty-interface": "off",
+      },
+    },
+    {
+      files: ["**/repository/**/*.ts", "**/usecases/**/*.ts"],
+      rules: {
+        "no-useless-constructor": "off",
       },
     },
   ],
